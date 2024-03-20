@@ -4,6 +4,7 @@
 import argparse
 import codecs
 import sys
+from nltk.stem import SnowballStemmer
 
 import json
 import string
@@ -11,13 +12,15 @@ import string
 
 class Index:
     def __init__(self, index_file):
+        stemmer = SnowballStemmer("russian")
+        
         self.index: dict[str, set[str]] = {}
         f = codecs.open(index_file, encoding="utf-8", mode="r")
 
         for ln in f:
             sentence = ln.strip().translate(str.maketrans(string.punctuation, ' '*len(string.punctuation))).split()
             for i in range(1, len(sentence)):
-                word = sentence[i].lower()
+                word = stemmer.stem(sentence[i].lower())
                 if word not in self.index:
                     self.index[word] = set[str]()
 
@@ -28,6 +31,7 @@ class Index:
 
 class QueryTree:
     def __init__(self, qid, query):
+        self._stemmer = SnowballStemmer("russian")
         self._request: list[str] = []
 
         tmp = ""
@@ -73,7 +77,7 @@ class QueryTree:
         while self._c == "|":
             self._get()
             result = result | self._and(index)
-            
+
         return result
 
     def _and(self, index):
@@ -95,8 +99,8 @@ class QueryTree:
             if self._c != ")":
                 raise ValueError('Unmatched bracket')
         else:
-            if self._c in index.index:
-                result = index.index[self._c]
+            if self._stemmer.stem(self._c) in index.index:
+                result = index.index[self._stemmer.stem(self._c)]
 
         self._get()
         
