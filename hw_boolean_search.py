@@ -10,6 +10,7 @@ import json
 import string
 
 
+
 class Index:
     def __init__(self, index_file):
         stemmer = SnowballStemmer("russian")
