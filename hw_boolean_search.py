@@ -18,7 +18,9 @@ class Index:
         self.index: dict[str, set[str]] = {}
         f = codecs.open(index_file, encoding="utf-8", mode="r")
 
-        for ln in f:
+        for i, ln in enumerate(f):
+            if i % 200 == 0:
+                print(f"index {i}")
             sentence = ln.strip().translate(str.maketrans(string.punctuation, ' '*len(string.punctuation))).split()
             for i in range(1, len(sentence)):
                 word = stemmer.stem(sentence[i].lower())
@@ -65,10 +67,6 @@ class QueryTree:
         self._get()
 
         result = self._or(index)
-
-        f = codecs.open("res.json", encoding="utf-8", mode="a")
-        json.dump(list(result), f)
-
         
         return result
 
